@@ -88,16 +88,14 @@ exports.getAllReservations = getAllReservations;
  */
 const getAllProperties = function(options, limit = 10) {
   const queryString = `
-  SELECT * 
+  SELECT properties.*, avg(property_reviews.rating) AS average_rating
   FROM properties
-  
+  JOIN property_reviews ON properties.id = property_reviews.property_id
+  GROUP BY properties.id
   LIMIT $1
   `
   return pool.query(queryString, [limit])
-    .then((res) => {
-      // console.log(res.rows)
-      return res.rows;
-    })
+    .then((res) => res.rows)
     .catch(error => error)
   
 }
