@@ -21,16 +21,23 @@ const users = require('./json/users.json');
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithEmail = function(email) {
-  let user;
-  for (const userId in users) {
-    user = users[userId];
-    if (user.email.toLowerCase() === email.toLowerCase()) {
-      break;
-    } else {
-      user = null;
-    }
-  }
-  return Promise.resolve(user);
+  // let user;
+  // for (const userId in users) {
+  //   user = users[userId];
+  //   if (user.email.toLowerCase() === email.toLowerCase()) {
+  //     break;
+  //   } else {
+  //     user = null;
+  //   }
+  // }
+  // return Promise.resolve(user);
+  const queryString =`
+  SELECT id FROM users
+  WHERE email = $1;
+  `
+  return pool.query(queryString, [email])
+    .then(res => res ? res.rows[0] : null)
+    .catch(err => err)
 }
 exports.getUserWithEmail = getUserWithEmail;
 
@@ -40,7 +47,14 @@ exports.getUserWithEmail = getUserWithEmail;
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithId = function(id) {
-  return Promise.resolve(users[id]);
+  // return Promise.resolve(users[id]);
+  const queryString =`
+  SELECT id FROM users
+  WHERE id = $1;
+  `
+  return pool.query(queryString, [id])
+    .then(res => res ? res.rows[0] : null)
+    .catch(err => err)
 }
 exports.getUserWithId = getUserWithId;
 
@@ -51,10 +65,24 @@ exports.getUserWithId = getUserWithId;
  * @return {Promise<{}>} A promise to the user.
  */
 const addUser =  function(user) {
-  const userId = Object.keys(users).length + 1;
-  user.id = userId;
-  users[userId] = user;
-  return Promise.resolve(user);
+  // const userId = Object.keys(users).length + 1;
+  // user.id = userId;
+  // users[userId] = user;
+  // return Promise.resolve(user);
+  const queryString =`
+    INSERT INTO users (
+    name, email, password) 
+    VALUES ($1, $2, $3)
+    RETURNING *;
+  `
+  return pool.query(queryString, [user.name, user.email, user.password])
+    .then(res => {
+      if (res.rows) {
+        console.log(res.rows);
+        return res.rows[0];
+      }
+      return null;
+    })
 }
 exports.addUser = addUser;
 
@@ -95,7 +123,8 @@ const getAllProperties = function(options, limit = 10) {
     .then((res) => {
       // console.log(res.rows)
       return res.rows;
-    });
+    })
+    .catch(error => error)
   
 }
 exports.getAllProperties = getAllProperties;
