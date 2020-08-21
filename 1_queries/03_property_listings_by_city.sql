@@ -1,8 +1,17 @@
-SELECT properties.*, round(avg(property_reviews.rating)) as avg_rating
+-- SELECT properties.*, round(avg(property_reviews.rating)) as avg_rating
+-- FROM properties
+-- JOIN property_reviews ON properties.id = property_id
+-- WHERE city = 'Vancouver'
+-- GROUP BY properties.id
+-- HAVING  round(avg(rating)) >= 4
+-- ORDER BY cost_per_night
+-- LIMIT 10;
+
+SELECT properties.*, avg(property_reviews.rating) as average_rating
 FROM properties
 JOIN property_reviews ON properties.id = property_id
-WHERE city = 'Vancouver'
+WHERE city LIKE '%ancouv%'
 GROUP BY properties.id
-HAVING  round(avg(rating)) >= 4
+HAVING avg(property_reviews.rating) >= 4
 ORDER BY cost_per_night
 LIMIT 10;
